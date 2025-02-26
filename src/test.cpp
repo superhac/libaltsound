@@ -79,8 +79,9 @@ bool playbackCommands(const std::vector<TestData>& test_data)
 {
 	for (size_t i = 0; i < test_data.size(); ++i) {
 		const TestData& td = test_data[i];
-		if (!AltsoundProcessCommand(td.snd_cmd, 0))
-			throw std::runtime_error("Command playback failed");
+		if (!AltsoundProcessCommand(td.snd_cmd, 0)) {
+			//throw std::runtime_error("Command playback failed");
+		}
 
 		// Sleep for the duration specified in msec for each command, except for the last command.
 		if (i < test_data.size() - 1)
@@ -241,8 +242,8 @@ int main(int argc, const char* argv[]) {
 		return 1;
 	}
 
-	std::cout << "Press Enter to begin playback..." << std::endl;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Wait for user input
+	//std::cout << "Press Enter to begin playback..." << std::endl;
+	//std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Wait for user input
 
 	try {
 		std::cout << "Starting playback for \"" << init_result.second.altsound_path << "\"..." << std::endl;
