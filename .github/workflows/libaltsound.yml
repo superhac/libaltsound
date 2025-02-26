@@ -66,6 +66,10 @@ jobs:
             arch: arm64
     steps:
       - uses: actions/checkout@v4
+      - if: (matrix.platform == 'linux')
+        run: |
+          sudo apt-get update
+          sudo apt install cmake nasm bison zlib1g-dev libdrm-dev libgbm-dev libglu1-mesa-dev libegl-dev libgl1-mesa-dev libwayland-dev libwayland-egl-backend-dev libudev-dev libx11-dev libxrandr-dev libasound2-dev
       - if: (!(matrix.platform == 'linux' && matrix.arch == 'aarch64'))
         name: Build libaltsound-${{ matrix.platform }}-${{ matrix.arch }}
         run: |
