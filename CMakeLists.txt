@@ -107,13 +107,23 @@ if(BUILD_SHARED)
          third-party/build-libs/${PLATFORM}/${ARCH}
          third-party/runtime-libs/${PLATFORM}/${ARCH}
       )
-      target_link_libraries(altsound_shared PUBLIC bass)
+      target_link_libraries(altsound_shared PUBLIC 
+	bass
+	SDL3
+        SDL3_mixer
+       )
    elseif(PLATFORM STREQUAL "ios" OR PLATFORM STREQUAL "ios-simulator")
       target_link_directories(altsound_shared PUBLIC
          third-party/build-libs/${PLATFORM}/${ARCH}
          third-party/runtime-libs/${PLATFORM}/${ARCH}
+	 SDL3
+         SDL3_mixer
       )
-      target_link_libraries(altsound_shared PUBLIC bass)
+      target_link_libraries(altsound_shared PUBLIC 
+      SDL3
+      SDL3_mixer
+      bass
+      )
    elseif(PLATFORM STREQUAL "tvos")
       target_link_options(altsound_shared PUBLIC "-Wl,-F${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/frameworks")
       target_link_libraries(altsound_shared PUBLIC "-framework bass")
@@ -121,7 +131,11 @@ if(BUILD_SHARED)
       target_link_directories(altsound_shared PUBLIC
          third-party/runtime-libs/${PLATFORM}/${ARCH}
       )
-      target_link_libraries(altsound_shared PUBLIC bass)
+      target_link_libraries(altsound_shared PUBLIC 
+      SDL3
+      SDL3_mixer
+      bass
+      )
    endif()   
 
    if(PLATFORM STREQUAL "win" AND ARCH STREQUAL "x64")
@@ -151,14 +165,24 @@ if(BUILD_SHARED)
          add_custom_command(TARGET altsound_test POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/build-libs/${PLATFORM}/${ARCH}/bass.lib" "$<TARGET_FILE_DIR:altsound_test>"
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/bass.dll" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so.0" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3_mixer.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so.0" "$<TARGET_FILE_DIR:altsound_test>"
          )
       elseif(PLATFORM STREQUAL "macos")
          add_custom_command(TARGET altsound_test POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libbass.dylib" "$<TARGET_FILE_DIR:altsound_test>"
+	    COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.dylib" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3_mixer.dylib" "$<TARGET_FILE_DIR:altsound_test>"
          )
       elseif(PLATFORM STREQUAL "linux")
          add_custom_command(TARGET altsound_test POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libbass.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so.0" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3_mixer.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so.0" "$<TARGET_FILE_DIR:altsound_test>"
          )
       endif()
    endif()
@@ -194,26 +218,45 @@ if(BUILD_STATIC)
             third-party/build-libs/${PLATFORM}/${ARCH}
             third-party/runtime-libs/${PLATFORM}/${ARCH}
          )
-         target_link_libraries(altsound_test_s PUBLIC altsound_static bass)
+         target_link_libraries(altsound_test_s PUBLIC 
+	 altsound_static 
+	 bass
+	 SDL3
+         SDL3_mixer
+	 )
       else()
          target_link_directories(altsound_test_s PUBLIC
             third-party/runtime-libs/${PLATFORM}/${ARCH}
          )
-         target_link_libraries(altsound_test_s PUBLIC altsound_static bass)
+         target_link_libraries(altsound_test_s PUBLIC 
+         altsound_static
+	 SDL3
+         SDL3_mixer
+         bass)
       endif()
 
       if(PLATFORM STREQUAL "win")
          add_custom_command(TARGET altsound_test_s POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/build-libs/${PLATFORM}/${ARCH}/bass.lib" "$<TARGET_FILE_DIR:altsound_test_s>"
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/bass.dll" "$<TARGET_FILE_DIR:altsound_test_s>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.lib" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.dll" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3_mixer.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so.0" "$<TARGET_FILE_DIR:altsound_test>"
          )
       elseif(PLATFORM STREQUAL "macos")
          add_custom_command(TARGET altsound_test_s POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libbass.dylib" "$<TARGET_FILE_DIR:altsound_test_s>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.dylib" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3_mixer.dylib" "$<TARGET_FILE_DIR:altsound_test>"
          )
       elseif(PLATFORM STREQUAL "linux")
          add_custom_command(TARGET altsound_test_s POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libbass.so" "$<TARGET_FILE_DIR:altsound_test_s>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so.0" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3_mixer.so" "$<TARGET_FILE_DIR:altsound_test>"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/third-party/runtime-libs/${PLATFORM}/${ARCH}/libSDL3.so.0" "$<TARGET_FILE_DIR:altsound_test>"
          )
       endif()
    endif()

@@ -1,0 +1,2 @@
+build/altsound_test /home/superhac/tables/Guns\ N\ Roses\ \(Data\ East\ 1994\)/pinmame/altsound/gnr_300/gnr_300-cmdlog.txt
+
