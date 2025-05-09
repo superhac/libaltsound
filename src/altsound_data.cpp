@@ -182,28 +182,7 @@ const char* get_bass_err()
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Helper function to check if a directory exists
-// ---------------------------------------------------------------------------
 
-bool dir_exists(const std::string& path_in)
-{
-	ALT_DEBUG(0, "BEGIN dir_exists()");
-	ALT_INDENT;
-
-	struct stat info;
-
-	if (stat(path_in.c_str(), &info) != 0) {
-		ALT_INFO(0, "Directory: %s does not exist", path_in.c_str());
-		ALT_DEBUG(0, "END dir_exists()");
-		return false;
-	}
-	ALT_INFO(0, "Directory: %s exists", path_in.c_str());
-
-	ALT_OUTDENT;
-	ALT_INFO(0, "END dir_exists()");
-	return (info.st_mode & S_IFDIR) != 0;
-}
 
 // ----------------------------------------------------------------------------
 // Helper function to trim whitespace from parsed tokens

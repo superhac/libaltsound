@@ -515,7 +515,7 @@ string AltsoundIniProcessor::get_altsound_format(const string& path_in)
 		"voice"
 	};
 
-	if (std::any_of(directories.begin(), directories.end(), [&](const auto& directory) {
+/* 	if (std::any_of(directories.begin(), directories.end(), [&](const auto& directory) {
 		return dir_exists(path_in + directory);
 	}))
 	{
@@ -523,7 +523,7 @@ string AltsoundIniProcessor::get_altsound_format(const string& path_in)
 		ALT_OUTDENT;
 		ALT_DEBUG(0, "END get_altsound_format()");
 		return "legacy";
-	}
+	} */
 
 
 	ALT_OUTDENT;

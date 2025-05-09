@@ -80,6 +80,12 @@ set(ALTSOUND_SOURCES
    src/altsound_csv_parser.hpp
    src/gsound_processor.cpp
    src/gsound_processor.hpp
+   src/fileparsers.cpp
+   src/fileparsers.h
+   src/datastructs.cpp
+   src/datastructs.h
+   src/soundtypebehaviors.cpp
+   src/soundtypebehaviors.h
 
    src/altsound.cpp
    src/altsound.h
@@ -157,6 +163,9 @@ if(BUILD_SHARED)
    if(PLATFORM STREQUAL "win" OR PLATFORM STREQUAL "macos" OR PLATFORM STREQUAL "linux")
       add_executable(altsound_test
          src/test.cpp
+         src/fileparsers.cpp
+         src/datastructs.cpp
+         src/soundtypebehaviors.cpp
       )
 
       target_link_libraries(altsound_test PUBLIC altsound_shared)

@@ -134,11 +134,11 @@ bool AltsoundProcessorBase::startLogging(const std::string& gameName) {
 	std::string game_altsound_path = vpm_path + "altsound/" + gameName + '/';
 
 	// Check if game_altsound_path is valid
-	if (!dir_exists(game_altsound_path)) {
+/* 	if (!dir_exists(game_altsound_path)) {
 		ALT_ERROR(1, "Altsound path does not exist: %s", game_altsound_path.c_str());
 		ALT_DEBUG(0, "END startLogging()");
 		return false;
-	}
+	} */
 
 	logFile << "altsound_path: " << game_altsound_path << std::endl;
     logFile << "hardware_gen: 0x" << 0 << std::endl;

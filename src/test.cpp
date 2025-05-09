@@ -27,6 +27,8 @@
 // ---------------------------------------------------------------------------
 
 #include "altsound.h"
+#include "fileparsers.h"
+#include "datastructs.h"
 
 #include <thread>
 #include <vector>
@@ -40,45 +42,10 @@
 
 using std::string;
 
-// ---------------------------------------------------------------------------
-// Globals
-// ---------------------------------------------------------------------------
-
-// Structure to hold a sound command and its associated timing
-struct TestData {
-	unsigned int msec;
-	uint32_t snd_cmd;
-};
-
-struct InitData {
-	string log_path;
-	std::vector<TestData> test_data;
-	string vpm_path;
-	string altsound_path;
-	string game_name;
-	ALTSOUND_HARDWARE_GEN hardware_gen;
-};
-
-// ----------------------------------------------------------------------------
-
-string extractValue(const string& line) {
-	size_t colonPos = line.find(':');
-	if (colonPos == string::npos)
-		throw std::runtime_error("Value could not be determined");
-	size_t valueStart = colonPos + 1;
-	while (valueStart < line.size() && line[valueStart] == ' ')
-		++valueStart;
-
-	string value = line.substr(valueStart);
-	if (!value.empty() && value.back() == '\r')
-		value.pop_back();
-	return value;
-}
-
-bool playbackCommands(const std::vector<TestData>& test_data)
+bool playbackCommands(const std::vector<DataStructs::TestData>& test_data)
 {
 	for (size_t i = 0; i < test_data.size(); ++i) {
-		const TestData& td = test_data[i];
+		const DataStructs::TestData& td = test_data[i];
 		if (!AltsoundProcessCommand(td.snd_cmd, 0)) {
 			//throw std::runtime_error("Command playback failed");
 		}
@@ -94,130 +61,32 @@ bool playbackCommands(const std::vector<TestData>& test_data)
 	return true;
 }
 
-// ----------------------------------------------------------------------------
-// Command file parser
-// ----------------------------------------------------------------------------
-
-bool parseCmdFile(InitData& init_data)
-{
-	std::cout << "BEGIN parseCmdFile" << std::endl;
-
-	try {
-		std::ifstream inFile(init_data.log_path);
-		if (!inFile.is_open())
-			throw std::runtime_error("Unable to open file: " + init_data.log_path);
-
-		string line;
-
-		// Process paths and game name
-		if (!std::getline(inFile, line))
-			throw std::runtime_error("altsound_path value could not be determined");
-
-		string altsoundPath = extractValue(line);
-	 	std::replace(altsoundPath.begin(), altsoundPath.end(), '\\', '/');
-		if (altsoundPath.back() != '/')
-			altsoundPath += '/';
-
-		size_t altsoundPos = altsoundPath.find("/altsound/");
-		if (altsoundPos == string::npos)
-			throw std::runtime_error("altsound_path value could not be determined");
-
-		init_data.altsound_path = altsoundPath;
-		init_data.vpm_path = altsoundPath.substr(0, altsoundPos + 1);
-
-		size_t nextSlashPos = altsoundPath.find('/', altsoundPos + 10);
-		if (nextSlashPos == string::npos)
-			throw std::runtime_error("game name could not be determined");
-
-		init_data.game_name = altsoundPath.substr(altsoundPos + 10, nextSlashPos - (altsoundPos + 10));
-
-		// Process hardware_gen
-		if (!std::getline(inFile, line))
-			throw std::runtime_error("hardware_gen value could not be determined");
-
-		std::string hexString = extractValue(line);
-		init_data.hardware_gen = (ALTSOUND_HARDWARE_GEN)std::stoull(hexString, nullptr, 16);
-
-		std::cout << "Altsound path: " << init_data.altsound_path << std::endl;
-		std::cout << "VPinMAME path: " << init_data.vpm_path << std::endl;
-		std::cout << "Game name: " << init_data.game_name << std::endl;
-		std::cout << "Hardware Gen: 0x" 
-			<< std::setfill('0') << std::setw(13) 
-			<< std::hex << init_data.hardware_gen << std::endl;
-
-		// The rest of the lines are test data
-		while (std::getline(inFile, line)) {
-			if (!line.empty() && line.back() == '\r')
-				line.pop_back();
-
-			if (line.empty())
-				continue;
-
-			std::istringstream ss(line);
-
-			TestData data;
-			string temp, command;
-
-			if (!std::getline(ss, temp, ','))
-				continue;
-
-			char* end;
-			data.msec = std::strtoul(temp.c_str(), &end, 10);
-			if (end == temp.c_str())
-				throw std::runtime_error("Unable to parse time: " + temp);
-
-			const string HEX_PREFIX = "0x";
-			ss >> std::ws;
-			if (!std::getline(ss, command, ',')) continue;
-			if (command.substr(0, HEX_PREFIX.length()) == HEX_PREFIX)
-				command = command.substr(HEX_PREFIX.length());
-			else
-				throw std::runtime_error("Command value is not in hexadecimal format: " + command);
-
-			data.snd_cmd = std::strtoul(command.c_str(), &end, 16);
-			if (end == command.c_str())
-				throw std::runtime_error("Unable to parse command: " + command);
-
-			init_data.test_data.push_back(data);
-		}
-
-		inFile.close();
-		std::cout << "END parseCmdFile" << std::endl;
-		return true;
-	}
-	catch (const std::runtime_error& e) {
-		std::cout << e.what() << std::endl;
-		std::cout << "END parseCmdFile" << std::endl;
-		return false;
-	}
-}
-
-// ---------------------------------------------------------------------------
-
-std::pair<bool, InitData> init(const string& log_path)
+std::pair<bool, DataStructs::InitData> init(const string& log_path)
 {
 	std::cout << "BEGIN init()" << std::endl;
 
-	InitData init_data;
-	init_data.log_path = log_path;
+	FileParsers fp;
+	DataStructs ds;
+	//DataStructs::InitData init_data;
+	ds.m_init_data.log_path = log_path;
 
 	try {
-		if (!parseCmdFile(init_data))
+		if (!fp.parseCmdFile(ds))
 			throw std::runtime_error("Failed to parse command file.");
 
 		std::cout << "SUCCESS parseCmdFile()" << std::endl;
-		std::cout << "Num commands parsed: " << init_data.test_data.size() << std::endl;
+		std::cout << "Num commands parsed: " << ds.m_init_data.test_data.size() << std::endl;
 
-		AltsoundInit(init_data.vpm_path, init_data.game_name);
-		AltsoundSetHardwareGen(init_data.hardware_gen);
+		fp.altsoundInit(ds);
+		//AltsoundSetHardwareGen(init_data.hardware_gen);
 
 		std::cout << "END init()" << std::endl;
-		return std::make_pair(true, init_data);
+		return std::make_pair(true, ds.m_init_data);
 	}
 	catch (const std::runtime_error& e) {
 		std::cout << e.what() << std::endl;
 		std::cout << "END init()" << std::endl;
-		return std::make_pair(false, InitData{});
+		return std::make_pair(false, DataStructs::InitData{});
 	}
 }
 

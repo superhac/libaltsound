@@ -152,7 +152,7 @@ const char* toString(AltsoundSampleType sampleType);
 AltsoundSampleType toSampleType(const std::string& type_in);
 
 // determine if the given path exists
-bool dir_exists(const std::string& path_in);
+//bool dir_exists(const std::string& path_in);
 
 // trim leading and trailing whitespace from string
 std::string trim(const std::string& str);
