@@ -27,8 +27,14 @@
 // ---------------------------------------------------------------------------
 
 #include "altsound.h"
+
 #include "fileparsers.h"
 #include "datastructs.h"
+#include <plog/Log.h>
+#include <plog/Initializers/RollingFileInitializer.h>
+#include <plog/Appenders/ConsoleAppender.h>
+#include <plog/Appenders/RollingFileAppender.h>
+
 
 #include <thread>
 #include <vector>
@@ -61,32 +67,31 @@ bool playbackCommands(const std::vector<DataStructs::TestData>& test_data)
 	return true;
 }
 
-std::pair<bool, DataStructs::InitData> init(const string& log_path)
+bool init(const string& log_path, DataStructs& ds)
 {
-	std::cout << "BEGIN init()" << std::endl;
+	PLOGI << "BEGIN init()";
 
 	FileParsers fp;
-	DataStructs ds;
-	//DataStructs::InitData init_data;
 	ds.m_init_data.log_path = log_path;
 
 	try {
 		if (!fp.parseCmdFile(ds))
 			throw std::runtime_error("Failed to parse command file.");
 
-		std::cout << "SUCCESS parseCmdFile()" << std::endl;
-		std::cout << "Num commands parsed: " << ds.m_init_data.test_data.size() << std::endl;
+		PLOGI << "SUCCESS parseCmdFile()";;
+		PLOGI << "Num commands parsed: " << ds.m_init_data.test_data.size();
 
-		fp.altsoundInit(ds);
+		fp.parse_altsound_ini(ds);
+
 		//AltsoundSetHardwareGen(init_data.hardware_gen);
 
-		std::cout << "END init()" << std::endl;
-		return std::make_pair(true, ds.m_init_data);
+		PLOGI << "END init()";
+		return true;
 	}
 	catch (const std::runtime_error& e) {
-		std::cout << e.what() << std::endl;
-		std::cout << "END init()" << std::endl;
-		return std::make_pair(false, DataStructs::InitData{});
+		PLOGE << e.what();
+		PLOGE << "END init()";
+		return false;
 	}
 }
 
@@ -95,6 +100,15 @@ std::pair<bool, DataStructs::InitData> init(const string& log_path)
 // ---------------------------------------------------------------------------
 
 int main(int argc, const char* argv[]) {
+
+	// init plog
+	static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
+    static plog::RollingFileAppender<plog::TxtFormatter> fileAppender("plog.log", 1000000, 5);
+    plog::init(plog::verbose, &fileAppender).addAppender(&consoleAppender);
+	PLOGI << "libAltSound Starting";
+
+	DataStructs ds;
+
 	if (argc < 2) {
 		std::cout << "Usage: " << argv[0] << " <gamename>-cmdlog.txt path" << std::endl;
 		std::cout << "Where <gamename>-cmdlog.txt path is the full path and "
@@ -102,12 +116,12 @@ int main(int argc, const char* argv[]) {
 		return 1;
 	}
 
-	AltsoundSetLogger("./", ALTSOUND_LOG_LEVEL_DEBUG, true);
+	//AltsoundSetLogger("./", ALTSOUND_LOG_LEVEL_DEBUG, true);
 
-	const auto init_result = init(argv[1]);
+	const auto init_result = init(argv[1], ds);
 
-	if (!init_result.first) {
-		std::cout << "Initialization failed." << std::endl;
+	if (!init_result) {
+		PLOGI << "Initialization failed.";
 		return 1;
 	}
 
@@ -115,12 +129,12 @@ int main(int argc, const char* argv[]) {
 	//std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Wait for user input
 
 	try {
-		std::cout << "Starting playback for \"" << init_result.second.altsound_path << "\"..." << std::endl;
-		if (!playbackCommands(init_result.second.test_data)) {
+		PLOGI << "Starting playback for \"" << argv[1] << "\"...";
+		if (!playbackCommands(ds.m_init_data.test_data)) {
 			std::cout << "Playback failed" << std::endl;
 			return 1;
 		}
-		std::cout << "Playback finished for \"" << init_result.second.altsound_path << "\"..." << std::endl;
+		PLOGI << "Playback finished for \"" << argv[1] << "\"...";
 	}
 	catch (const std::exception& e) {
 		std::cout << "Unexpected error during playback:" << e.what()  << std::endl;

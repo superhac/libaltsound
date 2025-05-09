@@ -4,7 +4,7 @@
 
 void SoundTypeBehaviors::addDuckingProfile(int profileNum, SoundTypes::Value type, float volume)
 {
-    m_duckingProfiles[profileNum].emplace_back(type, volume); 
+    m_duckingProfiles[profileNum].emplace_back(type, volume);
 }
 
 int SoundTypeBehaviors::getDuckingProfileVolByType(int profileNum, SoundTypes::Value type)
@@ -14,7 +14,6 @@ int SoundTypeBehaviors::getDuckingProfileVolByType(int profileNum, SoundTypes::V
         std::cerr << "Invalid profile index: " << profileNum << std::endl;
         return -1;
     }
-
     auto profile = m_duckingProfiles[profileNum];
     for (size_t pairIndex = 0; pairIndex < profile.size(); ++pairIndex) {
         const auto& pair = profile[pairIndex];
@@ -43,7 +42,8 @@ void SoundTypeBehaviors::addDucks(SoundTypes::Value type)
     m_ducks.emplace_back(type);
 }
 
-SoundTypeBehaviors::SoundTypes::Value SoundTypeBehaviors::stringToSoundTypeEnum(const std::string& type) {
+SoundTypeBehaviors::SoundTypes::Value SoundTypeBehaviors::stringToSoundTypeEnum(const std::string& type) 
+{
     if (type == "music")
         return SoundTypes::MUSIC;
     else if (type == "callout")
@@ -57,4 +57,3 @@ SoundTypeBehaviors::SoundTypes::Value SoundTypeBehaviors::stringToSoundTypeEnum(
     else
         return SoundTypes::UNKNOWN;
 }
-

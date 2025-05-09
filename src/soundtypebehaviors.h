@@ -5,7 +5,6 @@
 #ifndef SOUNDTYPEBEHAVIORS_H
 #define SOUNDTYPEBEHAVIORS_H
 class SoundTypeBehaviors {
-
     public:
         struct  SoundTypes {
             enum Value {
