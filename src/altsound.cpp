@@ -310,7 +310,7 @@ ALTSOUNDAPI void AltsoundSetLogger(const string& logPath, ALTSOUND_LOG_LEVEL log
 
 ALTSOUNDAPI bool AltsoundInit(const string& pinmamePath, const string& gameName)
 {
-	ALT_DEBUG(0, "BEGIN AltsoundInit()");
+	/* ALT_DEBUG(0, "BEGIN AltsoundInit()");
 	ALT_INDENT;
 
 	if (g_pProcessor) {
@@ -390,14 +390,14 @@ ALTSOUNDAPI bool AltsoundInit(const string& pinmamePath, const string& gameName)
 	}
 
 	ALT_DEBUG(0, "END AltsoundInit()");
-	return true;
+	return true; */
 }
 
 /******************************************************
  * AltsoundProcessCommand
  ******************************************************/
 
-ALTSOUNDAPI void AltsoundSetHardwareGen(ALTSOUND_HARDWARE_GEN hardwareGen)
+/* ALTSOUNDAPI void AltsoundSetHardwareGen(ALTSOUND_HARDWARE_GEN hardwareGen)
 {
 	ALT_DEBUG(0, "BEGIN AltsoundSetHardwareGen()");
 	ALT_INDENT;
@@ -408,7 +408,7 @@ ALTSOUNDAPI void AltsoundSetHardwareGen(ALTSOUND_HARDWARE_GEN hardwareGen)
 
 	ALT_OUTDENT;
 	ALT_DEBUG(0, "END AltsoundSetHardwareGen()");
-}
+} */
 
 /******************************************************
  * AltsoundProcessCommand

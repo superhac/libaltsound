@@ -354,7 +354,7 @@ bool GSoundProcessor::handleCmd(const unsigned int cmd_combined_in)
 
 void GSoundProcessor::init()
 {
-	ALT_DEBUG(0, "BEGIN GSoundProcessor::init()");
+/* 	ALT_DEBUG(0, "BEGIN GSoundProcessor::init()");
 	ALT_INDENT;
 
 	// reset stream tracking variables
@@ -382,14 +382,14 @@ void GSoundProcessor::init()
 	AltsoundProcessorBase::init();
 
 	ALT_OUTDENT;
-	ALT_DEBUG(0, "END GSoundProcessor::init()");
+	ALT_DEBUG(0, "END GSoundProcessor::init()"); */
 }
 
 // ---------------------------------------------------------------------------
 
 bool GSoundProcessor::loadSamples()
 {
-	ALT_DEBUG(0, "BEGIN GSoundProcessor::loadSamples()");
+	/* ALT_DEBUG(0, "BEGIN GSoundProcessor::loadSamples()");
 	ALT_INDENT;
 
 	// DAR_TODO make vpm_path and game_name private w/accessors?
@@ -412,7 +412,7 @@ bool GSoundProcessor::loadSamples()
 
 	ALT_OUTDENT;
 	ALT_DEBUG(0, "END GSoundProcessor::init()");
-	return true;
+	return true; */
 }
 
 // ---------------------------------------------------------------------------

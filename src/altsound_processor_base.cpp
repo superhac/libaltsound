@@ -46,8 +46,8 @@ AltsoundProcessorBase::AltsoundProcessorBase(const std::string& _game_name,
   vpm_path(_vpm_path),
   skip_count(0)
 {
-	if (!vpm_path.empty() && vpm_path.back() != '/')
-		vpm_path += '/';
+	//if (!vpm_path.empty() && vpm_path.back() != '/')
+	//	vpm_path += '/';
 }
 
 AltsoundProcessorBase::~AltsoundProcessorBase()
@@ -95,7 +95,7 @@ bool AltsoundProcessorBase::handleCmd(const unsigned int cmd_in)
 
 void AltsoundProcessorBase::init()
 {
-#ifndef ALTSOUND_STANDALONE
+/* #ifndef ALTSOUND_STANDALONE
 	// If recording sound commands, initialize output file
 	if (rec_snd_cmds) {
 		if (!ALT_CALL(startLogging(AltsoundProcessorBase::getGameName()))) {
@@ -105,7 +105,7 @@ void AltsoundProcessorBase::init()
 			ALT_INFO(1, "SUCCESS startLogging()");
 		}
 	}
-#endif
+#endif */
 }
 
 // ---------------------------------------------------------------------------

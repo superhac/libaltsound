@@ -5,7 +5,10 @@
 #include <iomanip>
 #include <algorithm>
 #include <sys/stat.h>
+#include <unordered_set>
 #include <plog/Log.h>
+#include <SDL3/SDL.h>
+#include <SDL3_mixer/SDL_mixer.h>
 
 #include "fileparsers.h"
 #include "soundtypebehaviors.h"
@@ -31,11 +34,11 @@ bool FileParsers::parseCmdFile(DataStructs& ds)
 	PLOGI << "BEGIN parseCmdFile" << std::endl;
 
 	try {
-		std::ifstream inFile(ds.m_init_data.log_path);
+		std::ifstream inFile(ds.m_init_data.cmd_file);
 		if (!inFile.is_open())
         {
-            PLOGE << "Unable to open file: " <<  ds.m_init_data.log_path;
-			throw std::runtime_error("Unable to open file: " + ds.m_init_data.log_path);
+            PLOGE << "Unable to open file: " <<  ds.m_init_data.cmd_file;
+			throw std::runtime_error("Unable to open file: " + ds.m_init_data.cmd_file);
         }
 		string line;
 
@@ -143,67 +146,6 @@ bool FileParsers::parseCmdFile(DataStructs& ds)
 	}
 }
 
-bool FileParsers::altsoundInit(DataStructs& ds)
-{
-    // WORKING HERE
-	string format = ds.m_altsound_format;
-    return false; // REMOVE
-
-     // WORKING HERE! /////////////////////////////
-
-	/* if (format == "g-sound") {
-		// G-Sound only supports new CSV format. No need to specify format
-		// in the constructor
-		g_pProcessor = new GSoundProcessor(gameName, szPinmamePath);
-	}
-	else if (format == "altsound" || format == "legacy") {
-		g_pProcessor = new AltsoundProcessor(gameName, szPinmamePath, format);
-	}
-	else {
-		ALT_ERROR(0, "Unknown AltSound format: %s", format.c_str());
-		ALT_OUTDENT;
-		ALT_DEBUG(0, "END AltsoundInit()");
-		return false;
-	}
-
-	if (!g_pProcessor) {
-		ALT_ERROR(0, "FAILED: Unable to create AltSound Processor");
-		ALT_OUTDENT;
-		ALT_DEBUG(0, "END AltsoundInit()");
-		return false;
-	}
-	
-	ALT_INFO(0, "%s processor created", format.c_str());
-
-	g_pProcessor->setMasterVol(1.0f);
-	g_pProcessor->setGlobalVol(1.0f);
-	g_pProcessor->romControlsVol(ini_proc.usingRomVolumeControl());
-	g_pProcessor->recordSoundCmds(ini_proc.recordSoundCmds());
-	g_pProcessor->setSkipCount(ini_proc.getSkipCount());
-
-	// perform processor initialization (load samples, etc)
-	g_pProcessor->init();
-
-	g_cmdData.cmd_counter = 0;
-	g_cmdData.stored_command = -1;
-	g_cmdData.cmd_filter = 0;
-	std::fill_n(g_cmdData.cmd_buffer, ALT_MAX_CMDS, ~0);
-
-	// Initialize BASS
-	int DSidx = -1; // BASS default device
-
-	if (!BASS_Init(DSidx, 44100, 0, NULL, NULL)) {
-		ALT_ERROR(0, "BASS initialization error: %s", get_bass_err());
-	}
-
-	ALT_DEBUG(0, "END AltsoundInit()");
-
-
-    */
-
-	return true; 
-}
-
 bool FileParsers::parse_altsound_ini(DataStructs& ds)
 {
     PLOGI << "parse_altsound_ini()";
@@ -215,7 +157,7 @@ bool FileParsers::parse_altsound_ini(DataStructs& ds)
 
     ds.m_altSoundPath = szPinmamePath + "altsound/" + ds.m_init_data.game_name + '/';
 
-	PLOGI << "BEGIN AltsoundIniProcessor::parse_altsound_ini()";
+	PLOGI << "BEGIN FileParsers::parse_altsound_ini()";
 	
 	// if altsound.ini does not exist, create it
 	string ini_path = ds.getAltSoundPath() + "altsound.ini";
@@ -224,11 +166,11 @@ bool FileParsers::parse_altsound_ini(DataStructs& ds)
 	if (!file_in.good()) {
         PLOGI << "\"altsound.ini\" not found. Creating it." << ")";
 		if (!create_altsound_ini(ds)) {
-            PLOGE << "FAILED AltsoundIniProcessor::create_ini_file()";
-			PLOGI << "END AltsoundIniProcessor::parse_altsound_ini()";
+            PLOGE << "FAILED FileParsers::create_ini_file()";
+			PLOGI << "END FileParsers::parse_altsound_ini()";
 			return false;
 		}
-	    PLOGI << "SUCCESS AltsoundIniProcessor::create_ini_file()";
+	    PLOGI << "SUCCESS FileParsers::create_ini_file()";
 
 		// .ini file is created, open it
 		file_in.open(ini_path);
@@ -407,7 +349,7 @@ bool FileParsers::parse_altsound_ini(DataStructs& ds)
 
 bool FileParsers::create_altsound_ini(DataStructs& ds)
 {
-	PLOGE << "BEGIN AltsoundIniProcessor::create_altsound_ini()";
+	PLOGE << "BEGIN FileParsers::create_altsound_ini()";
 	const string format = get_altsound_format(ds);
 
 	if (format.empty()) {
@@ -833,4 +775,157 @@ bool FileParsers::parseDuckingProfile(const IniSection& ducking_section, SoundTy
 
 	PLOGI << "END FileParsers::parseDuckingProfile()";
 	return true;
+}
+
+bool FileParsers::parseGSoundCVS(DataStructs& ds)
+{
+	string filename = ds.m_altSoundPath + "g-sound.csv";
+	PLOGI << "BEGIN parsing gsound csv: " << filename;
+
+	std::ifstream file(filename);
+	if (!file.is_open()) {
+		PLOGE <<  "Unable to open file: %s", filename.c_str();
+		PLOGI <<  "END parsing gsound csv";
+		return false;
+	}
+
+	string line;
+
+	// skip header row
+	std::getline(file, line);
+
+	std::unordered_set<string> allowed_types = {
+		"music",
+		"callout",
+		"solo",
+		"sfx",
+		"overlay" 
+	};
+	
+	bool success = true;
+
+	try {
+		while (std::getline(file, line)) {
+			if (!line.empty() && line.back() == '\r')
+				line.pop_back();
+
+			if (line.empty())
+				continue;
+
+			// Some Altsounds use quotes around fields.  These need to be removed.
+			line.erase(std::remove(line.begin(), line.end(), '\"'), line.end());
+
+			std::stringstream ss(line);
+			string field;
+			DataStructs::GSoundSampleInfo entry;
+
+			// Read ID field (unsigned hexadecimal)
+			if (std::getline(ss, field, ',')) {
+				field = trim(field);
+				entry.id = std::stoul(field, nullptr, 16);
+			}
+			else {
+				PLOGE <<  "Failed to parse ID field";
+				success = false;
+				break;
+			}
+
+			// Read TYPE field
+			if (std::getline(ss, field, ',')) {
+				field = trim(field);
+				std::transform(field.begin(), field.end(), field.begin(), ::tolower);
+				entry.type = field;
+
+				if (allowed_types.find(field) == allowed_types.end()) {
+					PLOGE << "%s is not a known sample type";
+					success = false;
+					break;
+				}
+
+				if (field == "music") {
+					entry.loop = true;
+				}
+			}
+			else {
+				PLOGE <<  "Failed to parse TYPE field";
+				entry.type.clear();
+				success = false;
+				break;
+			}
+
+			// Read GAIN field (float)
+			if (std::getline(ss, field, ',')) {
+				field = trim(field);
+				float val = std::stof(field);
+				entry.gain = val < 0.0f ? 0.0f : val > 100.0f ? 1.0f : val / 100.0f;
+			}
+			else {
+				PLOGE << "Failed to parse GAIN field";
+				entry.gain = 1.0f;
+				success = false;
+				break;
+			}
+
+			// Read DUCKING_PROFILE field (uint)
+			if (std::getline(ss, field, ','))
+			{
+				if (field.empty()) {
+					field = "0"; // default value
+				}
+
+				field = trim(field);
+				unsigned int val = std::stoul(field);
+				entry.ducking_profile = val;
+			}
+			else {
+				PLOGE << "Failed to parse DUCKING_PROFILE field";
+				entry.ducking_profile = 0;
+				success = false;
+				break;
+			}
+
+			// Read FNAME field
+			if (std::getline(ss, field, ','))
+			{
+				field = trim(field);
+				if (field.empty()) {
+					PLOGE << "Sample filename is blank";
+					success = false;
+					entry.fname.clear();  // assign some default value
+					break;
+				}
+
+				string sample_path = ds.m_altSoundPath + field;
+
+				// Normalize to forward slashes
+				std::replace(sample_path.begin(), sample_path.end(), '\\', '/');
+				entry.fname = sample_path;
+			}
+			else {
+				PLOGE << "Failed to parse FNAME";
+				success = false;
+				entry.fname.clear();  // assign some default value
+				break;
+			}
+			
+			ds.m_gsoundSamples.push_back(entry);
+
+			std::ostringstream debug_stream;
+			debug_stream << "ID = 0x" << std::setfill('0') << std::setw(4) << std::hex << entry.id << std::dec
+				<< ", TYPE = " << entry.type
+				<< ", GAIN = " << std::fixed << std::setprecision(2) << entry.gain
+				<< ", DUCK_PRF = " << entry.ducking_profile
+				<< ", FNAME = " << entry.fname;
+
+			PLOGI << debug_stream.str().c_str();
+		}
+	}
+	catch (const std::exception& e) {
+	PLOGE << "GSoundCsvParser::parse(): " << e.what();
+	}
+
+	file.close();
+
+	PLOGI << "END BEGIN parsing gsound csv";
+	return success;
 }

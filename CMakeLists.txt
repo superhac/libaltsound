@@ -66,8 +66,8 @@ set(ALTSOUND_SOURCES
    src/altsound_data.hpp
    src/gsound_csv_parser.cpp
    src/gsound_csv_parser.hpp
-   src/altsound_ini_processor.hpp
-   src/altsound_ini_processor.cpp
+   #src/altsound_ini_processor.hpp
+   #src/altsound_ini_processor.cpp
    src/altsound_logger.cpp
    src/altsound_logger.hpp
    src/altsound_processor_base.cpp
@@ -80,12 +80,15 @@ set(ALTSOUND_SOURCES
    src/altsound_csv_parser.hpp
    src/gsound_processor.cpp
    src/gsound_processor.hpp
+   
    src/fileparsers.cpp
    src/fileparsers.h
    src/datastructs.cpp
    src/datastructs.h
    src/soundtypebehaviors.cpp
    src/soundtypebehaviors.h
+   src/gsound.cpp
+   src/gsound.h
 
    src/altsound.cpp
    src/altsound.h
@@ -166,6 +169,7 @@ if(BUILD_SHARED)
          src/fileparsers.cpp
          src/datastructs.cpp
          src/soundtypebehaviors.cpp
+         src/gsound.cpp
       )
 
       target_link_libraries(altsound_test PUBLIC altsound_shared)

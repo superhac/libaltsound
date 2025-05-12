@@ -43,6 +43,7 @@ class DataStructs {
 
         struct InitData {
             string log_path;
+            string cmd_file;
             std::vector<TestData> test_data;
             string vpm_path;
             string altsound_path;
@@ -60,9 +61,18 @@ class DataStructs {
             };
         };
 
-        InitData m_init_data;
-        //std::vector<TestData> m_test_data;
+        // Structure for holding G-Sound sample data
+        typedef struct _gsound_sample_info {
+            unsigned int id = 0;
+            std::string type;
+            float duck = 1.0f;
+            float gain = 1.0f;
+            std::string fname;
+            bool loop = false;
+            unsigned int ducking_profile = 0;
+        } GSoundSampleInfo;
 
+        InitData m_init_data;
         string m_altSoundPath;
         string m_altsound_format;
 
@@ -73,6 +83,9 @@ class DataStructs {
 
         //store behaviors
         std::vector<SoundTypeBehaviors> m_behaviors;
+
+        // gsound samples
+        std::vector<GSoundSampleInfo> m_gsoundSamples;
 
         string getAltSoundPath();
     };

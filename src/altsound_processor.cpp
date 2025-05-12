@@ -237,7 +237,7 @@ bool AltsoundProcessor::handleCmd(const unsigned int cmd_combined_in)
 
 void AltsoundProcessor::init()
 {
-	ALT_DEBUG(0, "BEGIN AltsoundProcessor::init()");
+/* 	ALT_DEBUG(0, "BEGIN AltsoundProcessor::init()");
 	ALT_OUTDENT;
 
 	// reset stream tracking
@@ -261,7 +261,7 @@ void AltsoundProcessor::init()
 	AltsoundProcessorBase::init();
 
 	ALT_OUTDENT;
-	ALT_DEBUG(0, "END AltsoundProcessor::init()");
+	ALT_DEBUG(0, "END AltsoundProcessor::init()"); */
 }
 
 // ----------------------------------------------------------------------------
@@ -291,7 +291,7 @@ void AltsoundProcessorBase::setGlobalVol(const float vol_in)
 
 bool AltsoundProcessor::loadSamples()
 {
-	ALT_DEBUG(0, "BEGIN AltsoundProcessor::loadSamples()");
+/* 	ALT_DEBUG(0, "BEGIN AltsoundProcessor::loadSamples()");
 	ALT_INDENT;
 
 	string altsound_path = vpm_path; // in base class
@@ -325,7 +325,7 @@ bool AltsoundProcessor::loadSamples()
 
 	ALT_OUTDENT;
 	ALT_DEBUG(0, "END AltsoundProcessor::loadSamples");
-	return true;
+	return true; */
 }
 
 // ---------------------------------------------------------------------------

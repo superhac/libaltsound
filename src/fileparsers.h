@@ -13,8 +13,8 @@ using std::string;
 class FileParsers {
     public:
         bool parseCmdFile(DataStructs& ds);
-        bool altsoundInit(DataStructs& ds);
         bool parse_altsound_ini(DataStructs& ds);
+        bool parseGSoundCVS(DataStructs& ds);
     private: 
         string extractValue(const string& line); 
         bool create_altsound_ini(DataStructs& ds);

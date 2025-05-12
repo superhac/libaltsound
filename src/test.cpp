@@ -28,8 +28,10 @@
 
 #include "altsound.h"
 
+#include <variant>
 #include "fileparsers.h"
 #include "datastructs.h"
+#include "gsound.h"
 #include <plog/Log.h>
 #include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Appenders/ConsoleAppender.h>
@@ -67,34 +69,6 @@ bool playbackCommands(const std::vector<DataStructs::TestData>& test_data)
 	return true;
 }
 
-bool init(const string& log_path, DataStructs& ds)
-{
-	PLOGI << "BEGIN init()";
-
-	FileParsers fp;
-	ds.m_init_data.log_path = log_path;
-
-	try {
-		if (!fp.parseCmdFile(ds))
-			throw std::runtime_error("Failed to parse command file.");
-
-		PLOGI << "SUCCESS parseCmdFile()";;
-		PLOGI << "Num commands parsed: " << ds.m_init_data.test_data.size();
-
-		fp.parse_altsound_ini(ds);
-
-		//AltsoundSetHardwareGen(init_data.hardware_gen);
-
-		PLOGI << "END init()";
-		return true;
-	}
-	catch (const std::runtime_error& e) {
-		PLOGE << e.what();
-		PLOGE << "END init()";
-		return false;
-	}
-}
-
 // ---------------------------------------------------------------------------
 // Functional code
 // ---------------------------------------------------------------------------
@@ -108,7 +82,8 @@ int main(int argc, const char* argv[]) {
 	PLOGI << "libAltSound Starting";
 
 	DataStructs ds;
-
+	FileParsers fp;
+	
 	if (argc < 2) {
 		std::cout << "Usage: " << argv[0] << " <gamename>-cmdlog.txt path" << std::endl;
 		std::cout << "Where <gamename>-cmdlog.txt path is the full path and "
@@ -118,15 +93,52 @@ int main(int argc, const char* argv[]) {
 
 	//AltsoundSetLogger("./", ALTSOUND_LOG_LEVEL_DEBUG, true);
 
-	const auto init_result = init(argv[1], ds);
-
-	if (!init_result) {
-		PLOGI << "Initialization failed.";
+	ds.m_init_data.cmd_file = argv[1];
+	try {
+		fp.parseCmdFile(ds);
+	}
+	catch (const std::runtime_error& e) {
+		PLOGE << e.what();
+		PLOGE << "END init()";
 		return 1;
 	}
+	fp.parse_altsound_ini(ds);
 
-	//std::cout << "Press Enter to begin playback..." << std::endl;
-	//std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Wait for user input
+	// WORKING HERE! /////////////////////////////
+
+	if (ds.m_altsound_format == "g-sound") {
+		// G-Sound only supports new CSV format. No need to specify format
+		// in the constructor
+		GSound gsp = GSound(ds);
+	}
+
+	
+
+    
+	/* else if (ds.m_altsound_format == "altsound" || format == "legacy") {
+		g_pProcessor = new AltsoundProcessor(gameName, szPinmamePath, ds.m_altsound_format);
+	}
+	else {
+		ALT_ERROR(0, "Unknown AltSound format: %s", format.c_str());
+		ALT_OUTDENT;
+		ALT_DEBUG(0, "END AltsoundInit()");
+		return false;
+	}
+
+	if (!g_pProcessor) {
+		ALT_ERROR(0, "FAILED: Unable to create AltSound Processor");
+		ALT_OUTDENT;
+		ALT_DEBUG(0, "END AltsoundInit()");
+		return false;
+	}
+	
+	ALT_INFO(0, "%s processor created", format.c_str()); */
+
+
+	//////////////////////WORKING HERE
+	
+	return 0;  // REMOVE
+	/////////////////////////////////////////////////////////////////
 
 	try {
 		PLOGI << "Starting playback for \"" << argv[1] << "\"...";
